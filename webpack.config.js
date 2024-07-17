@@ -15,7 +15,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
-const TerserPlugin = require("terser-webpack-plugin"); // minimise JS
+const TerserPlugin = require("terser-webpack-plugin");
 const dedent = require("dedent");
 const { Compilation } = require("webpack");
 
@@ -31,12 +31,11 @@ exec(`pybabel compile -d ${localePath} -D sphinx`);
  */
 
 const vendorVersions = { fontAwesome: require("@fortawesome/fontawesome-free/package.json").version };
-const paths = {
-  scriptPath: resolve(__dirname, "src/pydata_sphinx_theme/assets/scripts"),
-  staticPath: resolve(__dirname, "src/pydata_sphinx_theme/theme/pydata_sphinx_theme/static"),
-  vendorPath: resolve(staticPath, "vendor"),
-  fontAwesomePath: resolve(vendorPath, "fontawesome", vendorVersions.fontAwesome)
-};
+
+const scriptPath = resolve(__dirname, "src/pydata_sphinx_theme/assets/scripts");
+const staticPath = resolve(__dirname, "src/pydata_sphinx_theme/theme/pydata_sphinx_theme/static");
+const vendorPath = resolve(staticPath, "vendor");
+const faPath = { fontAwesome: resolve(vendorPath, "fontawesome", vendorVersions.fontAwesome) };
 
 /*******************************************************************************
  * functions to load the assets in the html head
@@ -44,33 +43,34 @@ const paths = {
  * the fonts are loaded from vendors
  */
 
-const assetLoaders = {
-  stylesheet: (css, hash) => `<link href="{{ pathto('_static/${css}', 1) }}?digest=${hash}" rel="stylesheet" />`,
-  preload: (js, hash) => `<link rel="preload" as="script" href="{{ pathto('_static/${js}', 1) }}?digest=${hash}" />`,
-  script: (js, hash) => `<script src="{{ pathto('_static/${js}', 1) }}?digest=${hash}"></script>`,
-  font: (woff2) => `<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ pathto('_static/${woff2}', 1) }}" />`
-};
+function stylesheet(css) { return `<link href="{{ pathto('_static/${css}', 1) }}?digest=${this.hash}" rel="stylesheet" />`; }
+function preload(js) { return `<link rel="preload" as="script" href="{{ pathto('_static/${js}', 1) }}?digest=${this.hash}" />`; }
+function script(js) { return `<script src="{{ pathto('_static/${js}', 1) }}?digest=${this.hash}"></script>`; }
+function font(woff2) { return `<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ pathto('_static/${woff2}', 1) }}" />`; }
 
 /*******************************************************************************
- * Define assets to load in the macro
+ * the assets to load in the macro
  */
-
-const assets = {
-  theme: {
-    stylesheets: ["styles/theme.css", "styles/bootstrap.css", "styles/pydata-sphinx-theme.css"],
-    scripts: ["scripts/bootstrap.js", "scripts/pydata-sphinx-theme.js"]
-  },
-  fontAwesome: {
-    stylesheets: [`vendor/fontawesome/${vendorVersions.fontAwesome}/css/all.min.css`],
-    scripts: [`vendor/fontawesome/${vendorVersions.fontAwesome}/js/all.min.js`],
-    fonts: [
-      `vendor/fontawesome/${vendorVersions.fontAwesome}/webfonts/fa-solid-900.woff2`,
-      `vendor/fontawesome/${vendorVersions.fontAwesome}/webfonts/fa-brands-400.woff2`,
-      `vendor/fontawesome/${vendorVersions.fontAwesome}/webfonts/fa-regular-400.woff2`
-    ]
-  }
-};
-
+const theme_stylesheets = [
+  "styles/theme.css", // basic sphinx css
+  "styles/bootstrap.css", // all bootstrap 5 css with variable adjustments
+  "styles/pydata-sphinx-theme.css", // all the css created for this specific theme
+];
+const theme_scripts = [
+  "scripts/bootstrap.js",
+  "scripts/pydata-sphinx-theme.js",
+];
+const fa_stylesheets = [
+  `vendor/fontawesome/${vendorVersions.fontAwesome}/css/all.min.css`,
+];
+const fa_scripts = [
+  `vendor/fontawesome/${vendorVersions.fontAwesome}/js/all.min.js`,
+];
+const fa_fonts = [
+  `vendor/fontawesome/${vendorVersions.fontAwesome}/webfonts/fa-solid-900.woff2`,
+  `vendor/fontawesome/${vendorVersions.fontAwesome}/webfonts/fa-brands-400.woff2`,
+  `vendor/fontawesome/${vendorVersions.fontAwesome}/webfonts/fa-regular-400.woff2`,
+];
 
 /*******************************************************************************
  * Cache-busting Jinja2 macros (`webpack-macros.html`) used in `layout.html`
@@ -79,25 +79,32 @@ const assets = {
  * @return {String} the macro to inject in layout.html
  */
 function macroTemplate({ compilation }) {
-  const { hash } = compilation;
-  return dedent(`
-    <!-- AUTO-GENERATED from webpack.config.js, do **NOT** edit by hand. -->
+
+  return dedent(`\
+    <!--
+      AUTO-GENERATED from webpack.config.js, do **NOT** edit by hand.
+      These are re-used in layout.html
+    -->
+    {# Load FontAwesome icons #}
     {% macro head_pre_icons() %}
-      ${assets.fontAwesome.stylesheets.map(css => assetLoaders.stylesheet(css, hash)).join("\n")}
-      ${assets.fontAwesome.fonts.map(assetLoaders.font).join("\n")}
+      ${fa_stylesheets.map(stylesheet.bind(compilation)).join("\n")}
+      ${fa_fonts.map(font).join("\n")}
     {% endmacro %}
 
     {% macro head_pre_assets() %}
-      ${assets.theme.stylesheets.map(css => assetLoaders.stylesheet(css, hash)).join("\n")}
+      <!-- Loaded before other Sphinx assets -->
+      ${theme_stylesheets.map(stylesheet.bind(compilation)).join("\n")}
     {% endmacro %}
 
     {% macro head_js_preload() %}
-      ${assets.theme.scripts.map(js => assetLoaders.preload(js, hash)).join("\n")}
-      ${assets.fontAwesome.scripts.map(js => assetLoaders.script(js, hash)).join("\n")}
+      <!-- Pre-loaded scripts that we'll load fully later -->
+      ${theme_scripts.map(preload.bind(compilation)).join("\n")}
+      ${fa_scripts.map(script.bind(compilation)).join("\n")}
     {% endmacro %}
 
     {% macro body_post() %}
-      ${assets.theme.scripts.map(js => assetLoaders.script(js, hash)).join("\n")}
+      <!-- Scripts loaded after <body> so the DOM is not blocked -->
+      ${theme_scripts.map(script.bind(compilation)).join("\n")}
     {% endmacro %}
   `);
 }
@@ -106,33 +113,48 @@ function macroTemplate({ compilation }) {
  * Bundle the modules to use them in the theme outputs
  */
 
-const plugins = [
-  new HtmlWebpackPlugin({
-    filename: resolve(paths.static, "webpack-macros.html"),
-    inject: false,
-    minify: false,
-    templateContent: macroTemplate
-  }),
-  new CopyPlugin({
-    patterns: [
-      { from: "LICENSE.txt", to: paths.fontAwesome, context: "./node_modules/@fortawesome/fontawesome-free" },
-      { from: "css/all.min.css", to: resolve(paths.fontAwesome, "css"), context: "./node_modules/@fortawesome/fontawesome-free" },
-      { from: "js/all.min.js", to: resolve(paths.fontAwesome, "js"), context: "./node_modules/@fortawesome/fontawesome-free" },
-      { from: "webfonts", to: resolve(paths.fontAwesome, "webfonts"), context: "./node_modules/@fortawesome/fontawesome-free" }
-    ]
-  }),
-  new MiniCssExtractPlugin({ filename: "styles/[name].css" })
-];
-
+const plugins = [new HtmlWebpackPlugin({
+  filename: resolve(staticPath, "webpack-macros.html"),
+  inject: false,
+  minify: false,
+  css: true,
+  templateContent: macroTemplate,
+}),
+new CopyPlugin({ // fontawesome
+  patterns: [
+    {
+      context: "./node_modules/@fortawesome/fontawesome-free",
+      from: "LICENSE.txt",
+      to: resolve(faPath.fontAwesome, "LICENSE.txt"),
+    },
+    {
+      context: "./node_modules/@fortawesome/fontawesome-free/css",
+      from: "all.min.css",
+      to: resolve(faPath.fontAwesome, "css"),
+    },
+    {
+      context: "./node_modules/@fortawesome/fontawesome-free/js",
+      from: "all.min.js",
+      to: resolve(faPath.fontAwesome, "js"),
+    },
+    {
+      context: "./node_modules/@fortawesome/fontawesome-free",
+      from: "webfonts",
+      to: resolve(faPath.fontAwesome, "webfonts"),
+    },
+  ]
+}),
+new MiniCssExtractPlugin({ filename: "styles/[name].css" })
+]
 
 module.exports = {
   mode: "production",
   devtool: "source-map",
   entry: {
-    "pydata-sphinx-theme": resolve(paths.script, "pydata-sphinx-theme.js"),
-    "bootstrap": resolve(paths.script, "bootstrap.js")
+    "pydata-sphinx-theme": resolve(scriptPath, "pydata-sphinx-theme.js"),
+    "bootstrap": resolve(scriptPath, "bootstrap.js"),
   },
-  output: { filename: "scripts/[name].js", path: paths.static },
+  output: { filename: "scripts/[name].js", path: staticPath },
   optimization: {
     minimizer: [
       new CssMinimizerPlugin(),
@@ -143,12 +165,14 @@ module.exports = {
     rules: [{
       test: /\.scss$/,
       use: [
-        MiniCssExtractPlugin.loader,
+        { loader: MiniCssExtractPlugin.loader },
         { loader: "css-loader", options: { url: false } },
-        "sass-loader"
-      ]
-    }]
+        { loader: "sass-loader", },
+      ],
+    }],
   },
   plugins,
-  experiments: { topLevelAwait: true }
+  experiments: {
+    topLevelAwait: true,
+  },
 };

@@ -46,7 +46,6 @@ const faPath = { fontAwesome: resolve(vendorPath, "fontawesome", vendorVersions.
 function stylesheet(css) { return `<link href="{{ pathto('_static/${css}', 1) }}?digest=${this.hash}" rel="stylesheet" />`; }
 function preload(js) { return `<link rel="preload" as="script" href="{{ pathto('_static/${js}', 1) }}?digest=${this.hash}" />`; }
 function script(js) { return `<script src="{{ pathto('_static/${js}', 1) }}?digest=${this.hash}"></script>`; }
-function font(woff2) { return `<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ pathto('_static/${woff2}', 1) }}" />`; }
 
 /*******************************************************************************
  * the assets to load in the macro
@@ -60,6 +59,7 @@ const theme_scripts = [
   "scripts/bootstrap.js",
   "scripts/pydata-sphinx-theme.js",
 ];
+
 const fa_stylesheets = [
   `vendor/fontawesome/${vendorVersions.fontAwesome}/css/all.min.css`,
 ];
@@ -85,11 +85,6 @@ function macroTemplate({ compilation }) {
       AUTO-GENERATED from webpack.config.js, do **NOT** edit by hand.
       These are re-used in layout.html
     -->
-    {# Load FontAwesome icons #}
-    {% macro head_pre_icons() %}
-      ${fa_stylesheets.map(stylesheet.bind(compilation)).join("\n")}
-      ${fa_fonts.map(font).join("\n")}
-    {% endmacro %}
 
     {% macro head_pre_assets() %}
       <!-- Loaded before other Sphinx assets -->
@@ -99,7 +94,6 @@ function macroTemplate({ compilation }) {
     {% macro head_js_preload() %}
       <!-- Pre-loaded scripts that we'll load fully later -->
       ${theme_scripts.map(preload.bind(compilation)).join("\n")}
-      ${fa_scripts.map(script.bind(compilation)).join("\n")}
     {% endmacro %}
 
     {% macro body_post() %}
@@ -120,30 +114,30 @@ const plugins = [new HtmlWebpackPlugin({
   css: true,
   templateContent: macroTemplate,
 }),
-new CopyPlugin({ // fontawesome
-  patterns: [
-    {
-      context: "./node_modules/@fortawesome/fontawesome-free",
-      from: "LICENSE.txt",
-      to: resolve(faPath.fontAwesome, "LICENSE.txt"),
-    },
-    {
-      context: "./node_modules/@fortawesome/fontawesome-free/css",
-      from: "all.min.css",
-      to: resolve(faPath.fontAwesome, "css"),
-    },
-    {
-      context: "./node_modules/@fortawesome/fontawesome-free/js",
-      from: "all.min.js",
-      to: resolve(faPath.fontAwesome, "js"),
-    },
-    {
-      context: "./node_modules/@fortawesome/fontawesome-free",
-      from: "webfonts",
-      to: resolve(faPath.fontAwesome, "webfonts"),
-    },
-  ]
-}),
+// new CopyPlugin({ // fontawesome
+//   patterns: [
+//     {
+//       context: "./node_modules/@fortawesome/fontawesome-free",
+//       from: "LICENSE.txt",
+//       to: resolve(faPath.fontAwesome, "LICENSE.txt"),
+//     },
+//     {
+//       context: "./node_modules/@fortawesome/fontawesome-free/css",
+//       from: "all.min.css",
+//       to: resolve(faPath.fontAwesome, "css"),
+//     },
+//     {
+//       context: "./node_modules/@fortawesome/fontawesome-free/js",
+//       from: "all.min.js",
+//       to: resolve(faPath.fontAwesome, "js"),
+//     },
+//     {
+//       context: "./node_modules/@fortawesome/fontawesome-free",
+//       from: "webfonts",
+//       to: resolve(faPath.fontAwesome, "webfonts"),
+//     },
+//   ]
+// }),
 new MiniCssExtractPlugin({ filename: "styles/[name].css" })
 ]
 
@@ -163,12 +157,24 @@ module.exports = {
   },
   module: {
     rules: [{
-      test: /\.scss$/,
+      test: /\.(scss|css)$/,
       use: [
         { loader: MiniCssExtractPlugin.loader },
         { loader: "css-loader", options: { url: false } },
         { loader: "sass-loader", },
       ],
+    },
+    {
+      test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+      use: [
+        {
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]',
+            outputPath: 'fonts/'
+          }
+        }
+      ]
     }],
   },
   plugins,

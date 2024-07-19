@@ -12,7 +12,6 @@
 
 const { resolve } = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
@@ -30,12 +29,9 @@ exec(`pybabel compile -d ${localePath} -D sphinx`);
  * Paths for various assets (sources and destinations)
  */
 
-const vendorVersions = { fontAwesome: require("@fortawesome/fontawesome-free/package.json").version };
-
 const scriptPath = resolve(__dirname, "src/pydata_sphinx_theme/assets/scripts");
 const staticPath = resolve(__dirname, "src/pydata_sphinx_theme/theme/pydata_sphinx_theme/static");
 const vendorPath = resolve(staticPath, "vendor");
-const faPath = { fontAwesome: resolve(vendorPath, "fontawesome", vendorVersions.fontAwesome) };
 
 /*******************************************************************************
  * functions to load the assets in the html head
@@ -58,18 +54,6 @@ const theme_stylesheets = [
 const theme_scripts = [
   "scripts/bootstrap.js",
   "scripts/pydata-sphinx-theme.js",
-];
-
-const fa_stylesheets = [
-  `vendor/fontawesome/${vendorVersions.fontAwesome}/css/all.min.css`,
-];
-const fa_scripts = [
-  `vendor/fontawesome/${vendorVersions.fontAwesome}/js/all.min.js`,
-];
-const fa_fonts = [
-  `vendor/fontawesome/${vendorVersions.fontAwesome}/webfonts/fa-solid-900.woff2`,
-  `vendor/fontawesome/${vendorVersions.fontAwesome}/webfonts/fa-brands-400.woff2`,
-  `vendor/fontawesome/${vendorVersions.fontAwesome}/webfonts/fa-regular-400.woff2`,
 ];
 
 /*******************************************************************************
@@ -107,40 +91,6 @@ function macroTemplate({ compilation }) {
  * Bundle the modules to use them in the theme outputs
  */
 
-const plugins = [new HtmlWebpackPlugin({
-  filename: resolve(staticPath, "webpack-macros.html"),
-  inject: false,
-  minify: false,
-  css: true,
-  templateContent: macroTemplate,
-}),
-// new CopyPlugin({ // fontawesome
-//   patterns: [
-//     {
-//       context: "./node_modules/@fortawesome/fontawesome-free",
-//       from: "LICENSE.txt",
-//       to: resolve(faPath.fontAwesome, "LICENSE.txt"),
-//     },
-//     {
-//       context: "./node_modules/@fortawesome/fontawesome-free/css",
-//       from: "all.min.css",
-//       to: resolve(faPath.fontAwesome, "css"),
-//     },
-//     {
-//       context: "./node_modules/@fortawesome/fontawesome-free/js",
-//       from: "all.min.js",
-//       to: resolve(faPath.fontAwesome, "js"),
-//     },
-//     {
-//       context: "./node_modules/@fortawesome/fontawesome-free",
-//       from: "webfonts",
-//       to: resolve(faPath.fontAwesome, "webfonts"),
-//     },
-//   ]
-// }),
-new MiniCssExtractPlugin({ filename: "styles/[name].css" })
-]
-
 module.exports = {
   mode: "production",
   devtool: "source-map",
@@ -148,36 +98,65 @@ module.exports = {
     "pydata-sphinx-theme": resolve(scriptPath, "pydata-sphinx-theme.js"),
     "bootstrap": resolve(scriptPath, "bootstrap.js"),
   },
+  // src/pydata_sphinx_theme/theme/pydata_sphinx_theme/static
   output: { filename: "scripts/[name].js", path: staticPath },
+  // output: { filename: "scripts/[name].js", path: __dirname + '/dist', },
   optimization: {
     minimizer: [
       new CssMinimizerPlugin(),
-      new TerserPlugin({ parallel: true })
+      // minify JS
+      new TerserPlugin({
+        terserOptions: { output: { ascii_only: true } }
+      })
     ]
   },
   module: {
-    rules: [{
-      test: /\.(scss|css)$/,
-      use: [
-        { loader: MiniCssExtractPlugin.loader },
-        { loader: "css-loader", options: { url: false } },
-        { loader: "sass-loader", },
-      ],
-    },
-    {
-      test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-      use: [
-        {
-          loader: 'file-loader',
-          options: {
-            name: '[name].[ext]',
-            outputPath: 'fonts/'
+    rules: [
+      {
+        // needed to properly load the fonts
+        test: /\.(woff(2)?|ttf|eot|otf)(\?v=\d+\.\d+\.\d+)?$/,
+        // test: /\.(ttf|eot|svg|woff(2)?)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: "./vendor/fontawesome/fonts",
+              publicPath: "./vendor/fontawesome/fonts",
+            },
           }
-        }
-      ]
-    }],
+        ]
+      },
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+          MiniCssExtractPlugin.loader,
+          // need url true to load the fonts
+          { loader: "css-loader", options: { sourceMap: true, url: true } },
+          {
+            loader: "sass-loader",
+            options: {
+              sourceMap: true,
+              sassOptions: {
+                outputStyle: 'expanded',
+              },
+            },
+
+          },
+        ],
+      },
+    ],
   },
-  plugins,
+  plugins: [
+    new HtmlWebpackPlugin({
+      filename: resolve(staticPath, "webpack-macros.html"),
+      inject: false,
+      minify: false,
+      css: true,
+      templateContent: macroTemplate,
+    }),
+    new MiniCssExtractPlugin({ filename: "styles/[name].css" })
+  ],
   experiments: {
     topLevelAwait: true,
   },

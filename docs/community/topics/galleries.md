@@ -15,19 +15,9 @@ If you build the documentation locally without first generating these images you
 
 If you'd like to build these images locally to preview in the theme, follow these steps:
 
-1. Install [playwright](https://playwright.dev/python/) and the Chromium browser add-on:
+1. Follow the instructions to [set up your development environment](../setup.md).
+2. Use `tox` to build the gallery images:
 
+   ```bash
+   tox run -e gallery
    ```
-   $ pip install playwright
-   $ playwright install chromium
-   ```
-
-2. Execute the gallery generation script from the repository root:
-
-   ```
-   $ python ./docs/scripts/generate_gallery_images.py
-   ```
-
-:::{note}
-The newly generated images will be pushed to the distant repository.
-:::

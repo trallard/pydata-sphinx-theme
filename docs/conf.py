@@ -40,7 +40,7 @@ extensions = [
     "sphinx_design",
     "sphinx_copybutton",
     "autoapi.extension",
-    # custom extentions
+    # custom extensions
     "_extension.gallery_directive",
     "_extension.component_directive",
     # For extension examples and demos

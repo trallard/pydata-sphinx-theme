@@ -1,3 +1,4 @@
+// Custom icons for the PyData Sphinx Theme documentation
 FontAwesome.library.add(
   /**
    * Custom icon definitions

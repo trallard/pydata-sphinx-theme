@@ -35,8 +35,8 @@ const localePath = resolve(__dirname, "src/pydata_sphinx_theme/locale");
 function stylesheet(css) { return `<link href="{{ pathto('_static/${css}', 1) }}?digest=${this.hash}" rel="stylesheet" />`; }
 function preloadScript(js) { return `<link rel="preload" as="script" href="{{ pathto('_static/${js}', 1) }}?digest=${this.hash}" />`; }
 function deferScript(js) { return `<script defer src="{{ pathto('_static/${js}', 1) }}?digest=${this.hash}"></script>`; }
-// Adding FA without preloading
-function script(js) { return `<script src="{{ pathto('_static/${js}', 1) }}?digest=${this.hash}"></script>`; }
+// Ensuring we can use pseudo-elements in the FontAwesome icons
+function deferFaScript(js) { return `<script data-search-pseudo-elements defer src="{{ pathto('_static/${js}', 1) }}?digest=${this.hash}"></script>`; }
 
 /*******************************************************************************
  * the assets to load in the macro
@@ -74,7 +74,7 @@ function macroTemplate({ compilation }) {
 
     {% macro head_js_preload() %}
       <!-- So that users can add custom icons -->
-      ${fa_scripts.map(deferScript.bind(compilation)).join("\n")}
+      ${fa_scripts.map(deferFaScript.bind(compilation)).join("\n")}
       <!-- Pre-loaded scripts that we'll load fully later -->
       ${theme_scripts.map(preloadScript.bind(compilation)).join("\n")}
     {% endmacro %}

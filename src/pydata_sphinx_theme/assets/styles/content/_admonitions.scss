@@ -4,7 +4,6 @@
  */
 // Configuration Variables
 $admonition-border-radius: 0.25rem;
-$admonition-border-width: 0.2rem;
 $admonition-left-border-width: 0.2rem;
 $admonition-spacing: 1rem;
 $admonition-icon-size: 1rem;
@@ -77,19 +76,22 @@ $admonition-types: (
   ),
 );
 
+// Base admoniton styles
 div.admonition,
 .admonition {
   margin: 1.5625em auto;
   padding: 0 0.6rem 0.8rem;
   overflow: hidden;
 
+  // Print and display
+
   /* break-inside has replaced page-break-inside and is widely usable since 2019 */
   page-break-inside: avoid;
   break-inside: avoid;
   border-left: $admonition-left-border-width solid;
-  border-color: var(--pst-color-info);
   border-radius: $admonition-border-radius;
   background-color: var(--pst-color-on-background);
+  border-color: var(--pst-color-info);
 
   @include box-shadow;
 
@@ -116,17 +118,21 @@ div.admonition,
     $icon-width: 1rem;
     $icon-margin-x: 0.5rem;
 
+    // Calculate icon space
+    $icon-space: calc(#{$icon-width} + #{2 * $icon-margin-x});
+
+    // Layout
     margin: 0 -0.6rem;
-    padding: 0.4rem 0.6rem $padding-top calc($icon-width + 2 * $icon-margin-x);
-    font-weight: var(--pst-admonition-font-weight-heading);
+    padding: 0.4rem 0.6rem $padding-top $icon-space;
     position: relative;
+    z-index: 1;
+    font-weight: var(--pst-admonition-font-weight-heading);
 
     @include legacy-backdrop-placeholder;
 
     background-color: var(--pst-color-info-bg);
 
     // now that we use solid colors we want the title on top
-    z-index: 1;
 
     &::after {
       position: absolute;

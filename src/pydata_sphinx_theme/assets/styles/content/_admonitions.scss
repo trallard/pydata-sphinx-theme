@@ -2,8 +2,80 @@
  * Admonitions and blocks of styled content.
  * Admonitions CSS originally inspired by https://squidfunk.github.io/mkdocs-material/getting-started/
  */
+// Configuration Variables
 $admonition-border-radius: 0.25rem;
+$admonition-border-width: 0.2rem;
 $admonition-left-border-width: 0.2rem;
+$admonition-spacing: 1rem;
+$admonition-icon-size: 1rem;
+$admonition-icon-margin: 0.5rem;
+$admonition-content-indent: 1.4rem;
+
+// Admonition type definitions
+
+// "color" is used for the icon and the admonition left border
+$admonition-types: (
+  "default": (
+    "bg-color": "var(--pst-color-info-bg)",
+    "color": "var(--pst-color-info)",
+    "icon": "var(--pst-icon-admonition-default)",
+  ),
+  "attention": (
+    "bg-color": "var(--pst-color-attention-bg)",
+    "color": "var(--pst-color-attention)",
+    "icon": "var(--pst-icon-admonition-attention)",
+  ),
+  "caution": (
+    "bg-color": "var(--pst-color-warning-bg)",
+    "color": "var(--pst-color-warning)",
+    "icon": "var(--pst-icon-admonition-caution)",
+  ),
+  "warning": (
+    "bg-color": "var(--pst-color-warning-bg)",
+    "color": "var(--pst-color-warning)",
+    "icon": "var(--pst-icon-admonition-warning)",
+  ),
+  "danger": (
+    "bg-color": "var(--pst-color-danger-bg)",
+    "color": "var(--pst-color-danger)",
+    "icon": "var(--pst-icon-admonition-danger)",
+  ),
+  "error": (
+    "bg-color": "var(--pst-color-danger-bg)",
+    "color": "var(--pst-color-danger)",
+    "icon": "var(--pst-icon-admonition-error)",
+  ),
+  "hint": (
+    "bg-color": "var(--pst-color-success-bg)",
+    "color": "var(--pst-color-success)",
+    "icon": "var(--pst-icon-admonition-hint)",
+  ),
+  "tip": (
+    "bg-color": "var(--pst-color-success-bg)",
+    "color": "var(--pst-color-success)",
+    "icon": "var(--pst-icon-admonition-tip)",
+  ),
+  "important": (
+    "bg-color": "var(--pst-color-attention-bg)",
+    "color": "var(--pst-color-attention)",
+    "icon": "var(--pst-icon-admonition-important)",
+  ),
+  "note": (
+    "bg-color": "var(--pst-color-info-bg)",
+    "color": "var(--pst-color-info)",
+    "icon": "var(--pst-icon-admonition-note)",
+  ),
+  "seealso": (
+    "bg-color": "var(--pst-color-success-bg)",
+    "color": "var(--pst-color-success)",
+    "icon": "var(--pst-icon-admonition-seealso)",
+  ),
+  "admonition-todo": (
+    "bg-color": "var(--pst-color-secondary-bg)",
+    "color": "var(--pst-color-secondary)",
+    "icon": "var(--pst-icon-admonition-todo)",
+  ),
+);
 
 div.admonition,
 .admonition {

@@ -18,9 +18,6 @@ env:
   FORCE_COLOR: "1" # Make tools pretty
   DEFAULT_PYTHON_VERSION: "3.12" # keep in sync with tox.ini
   PIP_DISABLE_PIP_VERSION_CHECK: "1" # Don't check for pip updates
-  # https://api.github.com/users/github-actions[bot]
-  GITHUB_ACTIONS_BOT_NAME: "github-actions[bot]"
-  GITHUB_ACTIONS_BOT_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
 
 permissions: {}
 
@@ -117,7 +114,7 @@ jobs:
     needs: run-pytest
     runs-on: ubuntu-latest
     # avoid running this on schedule, releases, workflow_call, or workflow_dispatch
-    if: github.event_name != 'schedule' && github.event_name != 'release'
+    if: github.event_name != 'schedule' && github.event_name != 'release' && github.event_name != 'workflow_call' && github.event_name != 'workflow_dispatch'
     permissions:
       contents: write
       pull-requests: write
@@ -159,26 +156,12 @@ jobs:
           path: htmlcov
         if: ${{ failure() }}
 
-        # note: we need to set the user email and name as the github-actions[bot] cannot access this context
-        # ref: https://api.github.com/users/github-actions%5Bbot%5D
-      - name: "Configure git committer"
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # check these are set correctly
-          git config user.name
-
       # seems we need to call this from the main CI workflow first
       - name: "Coverage comment 💬"
         uses: py-cov-action/python-coverage-comment-action@970a227e0c16ef4589a99a9970ab0ceb8c53059a
         id: coverage_comment
         with:
           GITHUB_TOKEN: ${{ github.token }}
-        env:
-          GIT_AUTHOR_NAME: ${{ env.GITHUB_ACTIONS_BOT_NAME }},
-          GIT_AUTHOR_EMAIL: ${{ env.GITHUB_ACTIONS_BOT_EMAIL }},
-          GIT_COMMITTER_NAME: ${{ env.GITHUB_ACTIONS_BOT_NAME }},
-          GIT_COMMITTER_EMAIL: ${{ env.GITHUB_ACTIONS_BOT_EMAIL }},
 
       - name: "Store Pull Request comment to be posted 📤"
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

@@ -13,9 +13,9 @@
     </li>
     {%- for doc in parents %}
     {% if doc.link %}
-    <li class="breadcrumb-item"><a href="{{ doc.link|e }}" class="nav-link">{{ doc.title }}</a></li>
+    <li class="svg-icon breadcrumb-item"><a href="{{ doc.link|e }}" class="nav-link">{{ doc.title }}</a></li>
     {% else %}
-    <li class="breadcrumb-item">{{ doc.title }}</li>
+    <li class="svg-icon breadcrumb-item">{{ doc.title }}</li>
     {% endif %}
     {%- endfor %}
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">{{ title }}</span></li>

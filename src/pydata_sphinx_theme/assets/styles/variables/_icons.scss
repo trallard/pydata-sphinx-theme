@@ -26,4 +26,10 @@ html {
 
   // Bootstrap icons
   --pst-breadcrumb-divider: "\f105";
+
+  // General icon reset/setup to ensure svg icons are displayed correctly
+  .svg-icon::before,
+  .svg-icon::after {
+    display: none;
+  }
 }

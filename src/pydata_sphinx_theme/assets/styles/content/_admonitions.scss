@@ -2,6 +2,9 @@
  * Admonitions and blocks of styled content.
  * Admonitions CSS originally inspired by https://squidfunk.github.io/mkdocs-material/getting-started/
  */
+
+@use "sass:map";
+
 // Configuration Variables
 $admonition-border-radius: 0.25rem;
 $admonition-left-border-width: 0.2rem;
@@ -11,7 +14,6 @@ $admonition-icon-margin: 0.5rem;
 $admonition-content-indent: 1.4rem;
 
 // Admonition type definitions
-
 // "color" is used for the icon and the admonition left border
 $admonition-types: (
   "default": (
@@ -76,6 +78,32 @@ $admonition-types: (
   ),
 );
 
+// Mixin to apply type-specific styles to admonitions
+// @param {Map} $admonition-properties - Map of properties for the admonition type
+// should match a type in $admonition-types
+@mixin style-admonition($admonition-properties) {
+  border-color: #{map.get($admonition-properties, "color")};
+
+  > .admonition-title {
+    background-color: #{map.get($admonition-properties, "bg-color")};
+
+    &::after {
+      color: #{map.get($admonition-properties, "color")};
+      content: #{map.get($admonition-properties, "icon")};
+    }
+  }
+
+  .svg-inline--fa {
+    color: #{map.get($admonition-properties, "color")};
+    position: absolute;
+    top: 0.4rem;
+    left: 0;
+    width: $admonition-icon-size;
+    height: $admonition-icon-size;
+    padding: 0.4rem 0.6rem;
+  }
+}
+
 // Base admoniton styles
 div.admonition,
 .admonition {
@@ -91,9 +119,11 @@ div.admonition,
   border-left: $admonition-left-border-width solid;
   border-radius: $admonition-border-radius;
   background-color: var(--pst-color-on-background);
-  border-color: var(--pst-color-info);
 
   @include box-shadow;
+
+  // Apply default styling
+  @include style-admonition(map.get($admonition-types, "default"));
 
   // Last item should have no spacing since we'll control that w/ padding
   *:last-child {
@@ -128,24 +158,10 @@ div.admonition,
     z-index: 1;
     font-weight: var(--pst-admonition-font-weight-heading);
 
-    @include legacy-backdrop-placeholder;
-
-    background-color: var(--pst-color-info-bg);
-
-    // now that we use solid colors we want the title on top
-
+    // Reset the icon styling
     &::after {
-      position: absolute;
-      top: $padding-top; // align icon with title text
-      left: 0;
-      margin: 0 $icon-margin-x;
-      width: $icon-width;
-      height: 1rem;
-      color: var(--pst-color-info);
+      display: none;
       font: var(--fa-font-solid);
-      line-height: inherit;
-      content: var(--pst-icon-admonition-default);
-      opacity: 1;
     }
 
     // Next element after title needs some extra upper-space
@@ -154,146 +170,16 @@ div.admonition,
     }
   }
 
-  &.attention {
-    border-color: var(--pst-color-attention);
-
-    > .admonition-title {
-      background-color: var(--pst-color-attention-bg);
-
-      &::after {
-        color: var(--pst-color-attention);
-        content: var(--pst-icon-admonition-attention);
+  // Generate all admonition types
+  @each $admonition-type, $admonition-properties in $admonition-types {
+    @if $admonition-type != "default" {
+      &.#{$admonition-type} {
+        @include style-admonition(
+          map.get($admonition-types, #{$admonition-type})
+        );
       }
-    }
-  }
 
-  &.caution {
-    border-color: var(--pst-color-warning);
-
-    > .admonition-title {
-      background-color: var(--pst-color-warning-bg);
-
-      &::after {
-        color: var(--pst-color-warning);
-        content: var(--pst-icon-admonition-caution);
-      }
-    }
-  }
-
-  &.warning {
-    border-color: var(--pst-color-warning);
-
-    > .admonition-title {
-      background-color: var(--pst-color-warning-bg);
-
-      &::after {
-        color: var(--pst-color-warning);
-        content: var(--pst-icon-admonition-warning);
-      }
-    }
-  }
-
-  &.danger {
-    border-color: var(--pst-color-danger);
-
-    > .admonition-title {
-      background-color: var(--pst-color-danger-bg);
-
-      &::after {
-        color: var(--pst-color-danger);
-        content: var(--pst-icon-admonition-danger);
-      }
-    }
-  }
-
-  &.error {
-    border-color: var(--pst-color-danger);
-
-    > .admonition-title {
-      background-color: var(--pst-color-danger-bg);
-
-      &::after {
-        color: var(--pst-color-danger);
-        content: var(--pst-icon-admonition-error);
-      }
-    }
-  }
-
-  &.hint {
-    border-color: var(--pst-color-success);
-
-    > .admonition-title {
-      background-color: var(--pst-color-success-bg);
-
-      &::after {
-        color: var(--pst-color-success);
-        content: var(--pst-icon-admonition-hint);
-      }
-    }
-  }
-
-  &.tip {
-    border-color: var(--pst-color-success);
-
-    > .admonition-title {
-      background-color: var(--pst-color-success-bg);
-
-      &::after {
-        color: var(--pst-color-success);
-        content: var(--pst-icon-admonition-tip);
-      }
-    }
-  }
-
-  &.important {
-    border-color: var(--pst-color-attention);
-
-    > .admonition-title {
-      background-color: var(--pst-color-attention-bg);
-
-      &::after {
-        color: var(--pst-color-attention);
-        content: var(--pst-icon-admonition-important);
-      }
-    }
-  }
-
-  &.note {
-    border-color: var(--pst-color-info);
-
-    > .admonition-title {
-      background-color: var(--pst-color-info-bg);
-
-      &::after {
-        color: var(--pst-color-info);
-        content: var(--pst-icon-admonition-note);
-      }
-    }
-  }
-
-  &.seealso {
-    border-color: var(--pst-color-success);
-
-    > .admonition-title {
-      background-color: var(--pst-color-success-bg);
-
-      &::after {
-        color: var(--pst-color-success);
-        content: var(--pst-icon-admonition-seealso);
-      }
-    }
-  }
-
-  &.admonition-todo {
-    border-color: var(--pst-color-secondary);
-
-    > .admonition-title {
-      background-color: var(--pst-color-secondary-bg);
-
-      &::after {
-        color: var(--pst-color-secondary);
-        content: var(--pst-icon-admonition-todo);
-      }
+      @debug "Creating admonition type: #{$admonition-type} with $map.get($admonition-types, #{$admonition-type}) ✨";
     }
   }
 

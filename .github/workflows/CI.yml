@@ -159,11 +159,14 @@ jobs:
         # note: we need to set the user email and name as the github-actions[bot] cannot access this context
         # ref: https://api.github.com/users/github-actions%5Bbot%5D
       - name: "Configure git committer"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # check these are set correctly
           git config user.name
+          gh auth login
 
       # seems we need to call this from the main CI workflow first
       - name: "Coverage comment 💬"

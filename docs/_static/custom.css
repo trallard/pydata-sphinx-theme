@@ -13,7 +13,7 @@ div.admonition.admonition-olive > .admonition-title {
   color: white;
 }
 
-div.admonition.admonition-olive > .admonition-title::after {
+div.admonition.admonition-olive > .admonition-title > .svg-inline--fa {
   color: hsl(60deg 100% 25%);
 }
 

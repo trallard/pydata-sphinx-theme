@@ -198,34 +198,6 @@ div.admonition,
     // Undo the .sidebar directive border
     border-width: 0 0 0 $admonition-left-border-width;
 
-    // TODO: these semantic-color-names border-color rules might no longer be
-    //       needed when we drop support for Sphinx 4 / docutils 0.17
-    &.attention,
-    &.important {
-      border-color: var(--pst-color-attention);
-    }
-
-    &.caution,
-    &.warning {
-      border-color: var(--pst-color-warning);
-    }
-
-    &.danger,
-    &.error {
-      border-color: var(--pst-color-danger);
-    }
-
-    &.hint,
-    &.tip,
-    &.seealso {
-      border-color: var(--pst-color-success);
-    }
-
-    &.note,
-    &.todo {
-      border-color: var(--pst-color-info);
-    }
-
     // No inner margin since we have less horizontal space w/ the sidebar
     p.admonition-title ~ * {
       margin-left: 0;

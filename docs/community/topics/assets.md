@@ -7,7 +7,7 @@ The configuration for our asset compilation is in `webpack.config.js`.
 
 When assets are compiled, static versions are placed in various places in the theme's static folder:
 
-```
+```sh
 src/pydata_sphinx_theme/theme/pydata_sphinx_theme/static
 ```
 
@@ -18,7 +18,7 @@ site after upgrading the theme.
 To compile the assets and bundle them with the theme, run this command:
 
 ```console
-$ tox -e run compile
+$ tox -e run compile-assets
 ```
 
 ## Styles (SCSS) and Scripts (JS)

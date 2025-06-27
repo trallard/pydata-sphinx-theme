@@ -52,6 +52,13 @@ a {
     &::before {
       color: var(--pst-color-text-muted);
       font: var(--fa-font-brands);
+
+      // Reset the icon styling: this removes the unicode character
+      display: none;
+    }
+
+    // Style svg FontAwesome icon
+    .svg-inline--fa {
       margin-right: 0.25rem;
     }
   }

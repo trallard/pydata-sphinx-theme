@@ -27,9 +27,9 @@ html {
   // Bootstrap icons
   --pst-breadcrumb-divider: "\f105";
 
-  // General icon reset/setup to ensure svg icons are displayed correctly
-  .svg-icon::before,
-  .svg-icon::after {
+  // General icon reset/setup to ensure Font Awesome svg icons are displayed correctly
+  .fa-svg-icon::before,
+  .fa-svg-icon::after {
     display: none;
   }
 }

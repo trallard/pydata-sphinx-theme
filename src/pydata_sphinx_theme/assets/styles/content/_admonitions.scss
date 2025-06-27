@@ -8,12 +8,12 @@
 // Configuration Variables
 $admonition-border-radius: 0.25rem;
 $admonition-left-border-width: 0.2rem;
-$admonition-spacing: 1rem;
 $admonition-icon-size: 1rem;
-$admonition-icon-margin: 0.5rem;
 $admonition-content-indent: 1.4rem;
 
-// Admonition type definitions
+/**
+* Admonition types definitions
+*/
 // "color" is used for the icon and the admonition left border
 $admonition-types: (
   "default": (
@@ -78,7 +78,9 @@ $admonition-types: (
   ),
 );
 
-// Mixin to apply type-specific styles to admonitions
+/**
+* Mixin to apply type-specific styles to admonitions
+*/
 // @param {Map} $admonition-properties - Map of properties for the admonition type
 // should match a type in $admonition-types
 @mixin style-admonition($admonition-properties) {
@@ -93,14 +95,15 @@ $admonition-types: (
     }
   }
 
+  // Style svg FontAwesome icon
   .svg-inline--fa {
-    color: #{map.get($admonition-properties, "color")};
     position: absolute;
     top: 0.4rem;
     left: 0;
     width: $admonition-icon-size;
     height: $admonition-icon-size;
     padding: 0.4rem 0.6rem;
+    color: #{map.get($admonition-properties, "color")};
   }
 }
 
@@ -158,8 +161,8 @@ div.admonition,
     z-index: 1;
     font-weight: var(--pst-admonition-font-weight-heading);
 
-    // Reset the icon styling
     &::after {
+      // Reset the icon styling: this removes the unicode character
       display: none;
       font: var(--fa-font-solid);
     }
@@ -178,8 +181,6 @@ div.admonition,
           map.get($admonition-types, #{$admonition-type})
         );
       }
-
-      @debug "Creating admonition type: #{$admonition-type} with $map.get($admonition-types, #{$admonition-type}) ✨";
     }
   }
 

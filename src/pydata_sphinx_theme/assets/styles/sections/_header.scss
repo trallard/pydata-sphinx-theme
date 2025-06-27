@@ -226,11 +226,20 @@
   // Override Bootstrap
   transition: none;
 
+  // Reset the icon styling: this removes the unicode character
+  &::after {
+    display: none;
+  }
+
   &.nav-external::after {
     font: var(--fa-font-solid);
     content: var(--pst-icon-external-link);
-    font-size: 0.75em;
+  }
+
+  // Style svg FontAwesome icon
+  .svg-inline--fa {
     margin-left: 0.3em;
+    height: 0.75em;
   }
 }
 

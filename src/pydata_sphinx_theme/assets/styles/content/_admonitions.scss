@@ -2,24 +2,131 @@
  * Admonitions and blocks of styled content.
  * Admonitions CSS originally inspired by https://squidfunk.github.io/mkdocs-material/getting-started/
  */
+
+@use "sass:map";
+
+// Configuration Variables
 $admonition-border-radius: 0.25rem;
 $admonition-left-border-width: 0.2rem;
+$admonition-icon-size: 1rem;
+$admonition-content-indent: 1.4rem;
 
+/**
+* Admonition types definitions
+*/
+// "color" is used for the icon and the admonition left border
+$admonition-types: (
+  "default": (
+    "bg-color": "var(--pst-color-info-bg)",
+    "color": "var(--pst-color-info)",
+    "icon": "var(--pst-icon-admonition-default)",
+  ),
+  "attention": (
+    "bg-color": "var(--pst-color-attention-bg)",
+    "color": "var(--pst-color-attention)",
+    "icon": "var(--pst-icon-admonition-attention)",
+  ),
+  "caution": (
+    "bg-color": "var(--pst-color-warning-bg)",
+    "color": "var(--pst-color-warning)",
+    "icon": "var(--pst-icon-admonition-caution)",
+  ),
+  "warning": (
+    "bg-color": "var(--pst-color-warning-bg)",
+    "color": "var(--pst-color-warning)",
+    "icon": "var(--pst-icon-admonition-warning)",
+  ),
+  "danger": (
+    "bg-color": "var(--pst-color-danger-bg)",
+    "color": "var(--pst-color-danger)",
+    "icon": "var(--pst-icon-admonition-danger)",
+  ),
+  "error": (
+    "bg-color": "var(--pst-color-danger-bg)",
+    "color": "var(--pst-color-danger)",
+    "icon": "var(--pst-icon-admonition-error)",
+  ),
+  "hint": (
+    "bg-color": "var(--pst-color-success-bg)",
+    "color": "var(--pst-color-success)",
+    "icon": "var(--pst-icon-admonition-hint)",
+  ),
+  "tip": (
+    "bg-color": "var(--pst-color-success-bg)",
+    "color": "var(--pst-color-success)",
+    "icon": "var(--pst-icon-admonition-tip)",
+  ),
+  "important": (
+    "bg-color": "var(--pst-color-attention-bg)",
+    "color": "var(--pst-color-attention)",
+    "icon": "var(--pst-icon-admonition-important)",
+  ),
+  "note": (
+    "bg-color": "var(--pst-color-info-bg)",
+    "color": "var(--pst-color-info)",
+    "icon": "var(--pst-icon-admonition-note)",
+  ),
+  "seealso": (
+    "bg-color": "var(--pst-color-success-bg)",
+    "color": "var(--pst-color-success)",
+    "icon": "var(--pst-icon-admonition-seealso)",
+  ),
+  "admonition-todo": (
+    "bg-color": "var(--pst-color-secondary-bg)",
+    "color": "var(--pst-color-secondary)",
+    "icon": "var(--pst-icon-admonition-todo)",
+  ),
+);
+
+/**
+* Mixin to apply type-specific styles to admonitions
+*/
+// @param {Map} $admonition-properties - Map of properties for the admonition type
+// should match a type in $admonition-types
+@mixin style-admonition($admonition-properties) {
+  border-color: #{map.get($admonition-properties, "color")};
+
+  > .admonition-title {
+    background-color: #{map.get($admonition-properties, "bg-color")};
+
+    &::after {
+      color: #{map.get($admonition-properties, "color")};
+      content: #{map.get($admonition-properties, "icon")};
+    }
+  }
+
+  // Style svg FontAwesome icon
+  .svg-inline--fa {
+    position: absolute;
+    top: 0.4rem;
+    left: 0;
+    width: $admonition-icon-size;
+    height: $admonition-icon-size;
+    padding: 0.4rem 0.6rem;
+    color: #{map.get($admonition-properties, "color")};
+  }
+}
+
+// Base admoniton styles
 div.admonition,
 .admonition {
   margin: 1.5625em auto;
   padding: 0 0.6rem 0.8rem;
   overflow: hidden;
 
+  // Print and display
+
   /* break-inside has replaced page-break-inside and is widely usable since 2019 */
   page-break-inside: avoid;
   break-inside: avoid;
   border-left: $admonition-left-border-width solid;
-  border-color: var(--pst-color-info);
   border-radius: $admonition-border-radius;
   background-color: var(--pst-color-on-background);
 
   @include box-shadow;
+
+  // Apply default styling
+  @include style-admonition(map.get($admonition-types, "default"));
 
   // Last item should have no spacing since we'll control that w/ padding
   *:last-child {
@@ -44,30 +151,20 @@ div.admonition,
     $icon-width: 1rem;
     $icon-margin-x: 0.5rem;
 
+    // Calculate icon space
+    $icon-space: calc(#{$icon-width} + #{2 * $icon-margin-x});
+
+    // Layout
     margin: 0 -0.6rem;
-    padding: 0.4rem 0.6rem $padding-top calc($icon-width + 2 * $icon-margin-x);
-    font-weight: var(--pst-admonition-font-weight-heading);
+    padding: 0.4rem 0.6rem $padding-top $icon-space;
     position: relative;
-
-    @include legacy-backdrop-placeholder;
-
-    background-color: var(--pst-color-info-bg);
-
-    // now that we use solid colors we want the title on top
     z-index: 1;
+    font-weight: var(--pst-admonition-font-weight-heading);
 
     &::after {
-      position: absolute;
-      top: $padding-top; // align icon with title text
-      left: 0;
-      margin: 0 $icon-margin-x;
-      width: $icon-width;
-      height: 1rem;
-      color: var(--pst-color-info);
+      // Reset the icon styling: this removes the unicode character
+      display: none;
       font: var(--fa-font-solid);
-      line-height: inherit;
-      content: var(--pst-icon-admonition-default);
-      opacity: 1;
     }
 
     // Next element after title needs some extra upper-space
@@ -76,145 +173,13 @@ div.admonition,
     }
   }
 
-  &.attention {
-    border-color: var(--pst-color-attention);
-
-    > .admonition-title {
-      background-color: var(--pst-color-attention-bg);
-
-      &::after {
-        color: var(--pst-color-attention);
-        content: var(--pst-icon-admonition-attention);
-      }
-    }
-  }
-
-  &.caution {
-    border-color: var(--pst-color-warning);
-
-    > .admonition-title {
-      background-color: var(--pst-color-warning-bg);
-
-      &::after {
-        color: var(--pst-color-warning);
-        content: var(--pst-icon-admonition-caution);
-      }
-    }
-  }
-
-  &.warning {
-    border-color: var(--pst-color-warning);
-
-    > .admonition-title {
-      background-color: var(--pst-color-warning-bg);
-
-      &::after {
-        color: var(--pst-color-warning);
-        content: var(--pst-icon-admonition-warning);
-      }
-    }
-  }
-
-  &.danger {
-    border-color: var(--pst-color-danger);
-
-    > .admonition-title {
-      background-color: var(--pst-color-danger-bg);
-
-      &::after {
-        color: var(--pst-color-danger);
-        content: var(--pst-icon-admonition-danger);
-      }
-    }
-  }
-
-  &.error {
-    border-color: var(--pst-color-danger);
-
-    > .admonition-title {
-      background-color: var(--pst-color-danger-bg);
-
-      &::after {
-        color: var(--pst-color-danger);
-        content: var(--pst-icon-admonition-error);
-      }
-    }
-  }
-
-  &.hint {
-    border-color: var(--pst-color-success);
-
-    > .admonition-title {
-      background-color: var(--pst-color-success-bg);
-
-      &::after {
-        color: var(--pst-color-success);
-        content: var(--pst-icon-admonition-hint);
-      }
-    }
-  }
-
-  &.tip {
-    border-color: var(--pst-color-success);
-
-    > .admonition-title {
-      background-color: var(--pst-color-success-bg);
-
-      &::after {
-        color: var(--pst-color-success);
-        content: var(--pst-icon-admonition-tip);
-      }
-    }
-  }
-
-  &.important {
-    border-color: var(--pst-color-attention);
-
-    > .admonition-title {
-      background-color: var(--pst-color-attention-bg);
-
-      &::after {
-        color: var(--pst-color-attention);
-        content: var(--pst-icon-admonition-important);
-      }
-    }
-  }
-
-  &.note {
-    border-color: var(--pst-color-info);
-
-    > .admonition-title {
-      background-color: var(--pst-color-info-bg);
-
-      &::after {
-        color: var(--pst-color-info);
-        content: var(--pst-icon-admonition-note);
-      }
-    }
-  }
-
-  &.seealso {
-    border-color: var(--pst-color-success);
-
-    > .admonition-title {
-      background-color: var(--pst-color-success-bg);
-
-      &::after {
-        color: var(--pst-color-success);
-        content: var(--pst-icon-admonition-seealso);
-      }
-    }
-  }
-
-  &.admonition-todo {
-    border-color: var(--pst-color-secondary);
-
-    > .admonition-title {
-      background-color: var(--pst-color-secondary-bg);
-
-      &::after {
-        color: var(--pst-color-secondary);
-        content: var(--pst-icon-admonition-todo);
+  // Generate all admonition types
+  @each $admonition-type, $admonition-properties in $admonition-types {
+    @if $admonition-type != "default" {
+      &.#{$admonition-type} {
+        @include style-admonition(
+          map.get($admonition-types, #{$admonition-type})
+        );
       }
     }
   }
@@ -232,34 +197,6 @@ div.admonition,
 
     // Undo the .sidebar directive border
     border-width: 0 0 0 $admonition-left-border-width;
-
-    // TODO: these semantic-color-names border-color rules might no longer be
-    //       needed when we drop support for Sphinx 4 / docutils 0.17
-    &.attention,
-    &.important {
-      border-color: var(--pst-color-attention);
-    }
-
-    &.caution,
-    &.warning {
-      border-color: var(--pst-color-warning);
-    }
-
-    &.danger,
-    &.error {
-      border-color: var(--pst-color-danger);
-    }
-
-    &.hint,
-    &.tip,
-    &.seealso {
-      border-color: var(--pst-color-success);
-    }
-
-    &.note,
-    &.todo {
-      border-color: var(--pst-color-info);
-    }
 
     // No inner margin since we have less horizontal space w/ the sidebar
     p.admonition-title ~ * {

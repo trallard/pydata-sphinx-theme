@@ -1,3 +1,5 @@
+@use "sass:map";
+
 div.versionadded,
 div.versionchanged,
 div.deprecated,
@@ -58,37 +60,48 @@ span.versionmodified {
   font-weight: 600;
 
   &::before {
-    margin-right: 0.6rem;
     color: var(--pst-color-info);
     font: var(--fa-font-solid);
-    content: var(--pst-icon-versionmodified-default);
+
+    // Reset the icon styling: this removes the unicode character
+    display: none;
+  }
+
+  // Style svg FontAwesome icon
+  .svg-inline--fa {
+    margin-right: 0.6rem;
   }
 }
 
-span.versionmodified.added {
-  &::before {
-    color: var(--pst-color-success);
-    content: var(--pst-icon-versionmodified-added);
-  }
-}
+// Define the versionmodified variants and their properties
+$versionmodified-types: (
+  "added": (
+    "color": var(--pst-color-success),
+    "icon": var(--pst-icon-versionmodified-added),
+  ),
+  "changed": (
+    "color": var(--pst-color-warning),
+    "icon": var(--pst-icon-versionmodified-changed),
+  ),
+  "deprecated": (
+    "color": var(--pst-color-danger),
+    "icon": var(--pst-icon-versionmodified-deprecated),
+  ),
+  "removed": (
+    "color": var(--pst-color-danger),
+    "icon": var(--pst-icon-versionmodified-removed),
+  ),
+);
 
-span.versionmodified.changed {
-  &::before {
-    color: var(--pst-color-warning);
-    content: var(--pst-icon-versionmodified-changed);
-  }
-}
+// Generate all versionmodified variants
+@each $type, $properties in $versionmodified-types {
+  span.versionmodified.#{$type} {
+    .svg-inline--fa {
+      color: map.get($properties, "color");
+    }
 
-span.versionmodified.deprecated {
-  &::before {
-    color: var(--pst-color-danger);
-    content: var(--pst-icon-versionmodified-deprecated);
-  }
-}
-
-span.versionmodified.removed {
-  &::before {
-    color: var(--pst-color-danger);
-    content: var(--pst-icon-versionmodified-removed);
+    &::before {
+      content: map.get($properties, "icon");
+    }
   }
 }

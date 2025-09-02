@@ -198,7 +198,7 @@ Customizing the icon uses a similar process to customizing the color: create a n
             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             ```
 
-And add the following css to your ``custom.css`` file:
+And add the following CSS to your ``custom.css`` file:
 
 .. include:: ../_static/custom.css
     :start-after: begin-custom-icon
@@ -241,7 +241,7 @@ Here we demonstrate an admonition with a custom icon, color, and title (and also
 
             ````
 
-And add the following css to your custom.css file:
+And add the following CSS to your ``custom.css`` file:
 
 .. include:: ../_static/custom.css
     :start-after: begin-custom-youtube

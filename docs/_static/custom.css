@@ -13,7 +13,7 @@ div.admonition.admonition-olive > .admonition-title {
   color: white;
 }
 
-div.admonition.admonition-olive > .admonition-title::after {
+div.admonition.admonition-olive > .admonition-title > .svg-inline--fa {
   color: hsl(60deg 100% 25%);
 }
 
@@ -38,7 +38,7 @@ div.admonition.admonition-youtube > .admonition-title {
   color: white;
 }
 
-div.admonition.admonition-youtube > .admonition-title::after {
+div.admonition.admonition-youtube > .admonition-title > .svg-inline--fa {
   color: hsl(0deg 100% 50%);
   content: "\f26c"; /* fa-solid fa-tv */
 }
